@@ -12,7 +12,7 @@ spec:
     enabled: true
   certPolicyController:
     enabled: true
-  policyController: 
+  policyController:
     enabled: true
   searchCollector:
     enabled: true

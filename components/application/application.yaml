@@ -4,7 +4,7 @@ metadata:
   name: replace-me
   namespace: openshift-gitops
 spec:
-  source: {} # replace-me
+  source: {}  # replace-me
   destination:
     namespace: replace-me
     server: https://kubernetes.default.svc

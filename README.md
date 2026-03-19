@@ -5,7 +5,7 @@ Useful for demonstrating cluster-level multitenancy.
 
 ## Directory structure
 
-```
+```tree
 ├── bootstrap
 │   ├── base
 │   ├── namespaces
@@ -18,7 +18,7 @@ Useful for demonstrating cluster-level multitenancy.
 │           ├── team-1
 │           ├── team-2
 │           └── team-3
-├── cluster_typess
+├── cluster_types
 │   ├── type_a
 │   ├── type_b
 │   └── type_c
@@ -71,7 +71,6 @@ Useful for demonstrating cluster-level multitenancy.
   synchronizes these subdirectories with hub clusters.
   - `hubs/$HUB_NAME/managed_clusters`: Clusters managed by an ACM hub.
   - `hubs/$HUB_NAME/operators`: Operators installed into the hub.
-
 
 ## How to use this demo
 

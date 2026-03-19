@@ -22,7 +22,7 @@ spec:
         namespace: replace-me
         server: '{{server}}'
       project: default
-      source: {} # replace-me
+      source: {}  # replace-me
       syncPolicy:
         automated: {}
         syncOptions:
