@@ -292,6 +292,25 @@ You should see something like the below:
 
 ## Customizations
 
+### Changing the repository URL and/or branch
+
+Run the commands below to change the repo URL and branch that your clusters will
+sync against:
+
+```sh
+url="your-repo-url"
+branch="your-branch"
+grep -lr repoURL |
+    grep -v README.md |
+    xargs sed -Ei "s;repoURL:.*;repoURL: $url;g"
+grep -lr targetRevision |
+    grep -v README.md |
+    xargs sed -Ei "s;targetRevision:.*;targetRevision: $branch;g"
+```
+
+Commit and push your changes then re-bootstrap your hubs as documented in the
+[Deploy](#deploy) section.
+
 ### Using a private repository
 
 Do the following if you'd like to synchronize your cluster with a private
