@@ -1,2 +1,2 @@
 components/secrets/*
-!components/secrets/examples
+!components/secrets/_examples
