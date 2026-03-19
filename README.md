@@ -39,12 +39,12 @@ Useful for demonstrating cluster-level multitenancy.
 │       │   ├── installconfig
 │       │   │   └── aws
 │       │   └── pull_secret
-│       ├── cloud_credentials
+│       ├── cloud_credentials # <-- NOT COMMITTED TO GIT!
 │       │   └── aws
-│       ├── installconfig
+│       ├── installconfig # <-- NOT COMMITTED TO GIT!
 │       │   ├── aws
 │       │   └── templates
-│       └── pull_secret
+│       └── pull_secret # <-- NOT COMMITTED TO GIT!
 └── hubs
     └── primary
         ├── managed_clusters
@@ -79,6 +79,8 @@ Useful for demonstrating cluster-level multitenancy.
 
 - An OpenShift cluster with ACM and Multicluster Engine installed.
 - `oc` or `kubectl`
+- A GitHub or GitLab Account (any Git repo will work as long as your ACM hub can
+  access it)
 
 ### Generating Secrets
 
@@ -101,6 +103,8 @@ do
   cp "$secret" "$target"
 done
 ```
+
+> **NOTE**: These are **NOT** committed to Git!
 
 #### Updating the Installer Config secret for your managed clusters
 
@@ -245,3 +249,37 @@ Wait about an hour for the three managed clusters to finish provisioning.
 You should see something like the below:
 
 `#WIP`
+
+## Extending the demo
+
+GitOps enables you to customize any of your clusters to your liking! Here are
+some examples of tasks you can perform after you begin managing your clusters
+with GitOps.
+
+### Create a "staging" ACM hub
+
+You might want to create an ACM hub for testing new clusters, policies and/or
+configurations. This is straightforward to do with GitOps.
+
+1. Create a new copy of `hubs/primary`: `cp hubs/primary hubs/staging`
+2. Create a new bootstrap base for your new hub: `cp bootstrap/base
+   bootstrap/staging`
+3. Remove (or add!) any managed clusters in `hubs/staging`.
+4. Commit and push your changes.
+5. Bootstrap the new ACM hub: `oc login api.$STAGING_CLUSTER && oc apply -k
+   bootstrap/staging`
+
+### Provisioning clusters for teams
+
+1. Create a new branch off of `main`.
+2. Create a new copy of `hubs/primary/managed_clusters/team-1`.
+3. Modify the patches in the managed cluster kustomization that you copied.
+4. Commit and push your changes into your branch.
+5. Create a pull request to merge your branch into `main`.
+6. Hold a review session to verify your changes with the team (or other
+   stakeholders).
+7. Approve the request. The new cluster will get created within a minute or two
+   of `main` being updated.
+
+> **NOTE**: This approach works well with a "staging" ACM hub, especially if
+> teams will be requesting new clusters in a self-service model.
