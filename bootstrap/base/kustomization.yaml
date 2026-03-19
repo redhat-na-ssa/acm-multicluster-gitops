@@ -11,7 +11,7 @@ patches:
         - op: replace
           path: /spec/source
           value:
-            repoURL: https://github.com/redhat-na-ssa/acm-gitops-demo
+            repoURL: https://github.com/redhat-na-ssa/acm-multicluster-gitops
             targetRevision: test/readme-1
             path: ./hubs/primary
         - op: replace
