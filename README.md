@@ -298,11 +298,14 @@ Run the commands below to change the repo URL and branch that your clusters will
 sync against:
 
 ```sh
+# changing the repo URL
 url="your-repo-url"
-branch="your-branch"
 grep -lr repoURL |
     grep -v README.md |
     xargs sed -Ei "s;repoURL:.*;repoURL: $url;g"
+
+# changing the branch
+branch="your-branch"
 grep -lr targetRevision |
     grep -v README.md |
     xargs sed -Ei "s;targetRevision:.*;targetRevision: $branch;g"

@@ -12,7 +12,7 @@ patches:
           path: /spec/source
           value:
             repoURL: https://github.com/redhat-na-ssa/acm-gitops-demo
-            targetRevision: main
+            targetRevision: test/readme-1
             path: ./hubs/primary
         - op: replace
           path: /spec/destination/namespace
