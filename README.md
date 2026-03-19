@@ -143,6 +143,46 @@ keys set to `replace-me` with real values.
     components/secrets/pull_secret/credential.yaml
    ```
 
+### Validating bootstrap secrets
+
+Render the Kustomize template that will apply secrets to your cluster:
+
+```sh
+oc kustomize bootstrap/secrets
+```
+
+You should see a YAML like shown below:
+
+```yaml
+apiVersion: v1
+data:
+  aws_access_key_id: some key
+  aws_secret_access_key: some value
+kind: Secret
+metadata:
+  labels:
+    cluster.open-cluster-management.io/backup: ""
+    cluster.open-cluster-management.io/credentials: ""
+    cluster.open-cluster-management.io/type: aws
+  name: cloud-creds
+  namespace: cluster-team-1
+---
+apiVersion: v1
+data:
+  install-config.yaml: some-install-config
+kind: Secret
+metadata:
+  labels:
+
+```
+
+Verify that `replace-me` is not in the output:
+
+```sh
+oc kustomize bootstrap/secrets | grep -i replace
+# should be empty
+```
+
 ### Validating Hub configuration
 
 Render the Kustomize template that ArgoCD will apply onto your primary ACM hub:
@@ -249,6 +289,35 @@ Wait about an hour for the three managed clusters to finish provisioning.
 You should see something like the below:
 
 `#WIP`
+
+## Customizations
+
+### Using a private repository
+
+Do the following if you'd like to synchronize your cluster with a private
+repository:
+
+1. Update the `sshPrivateKey` property in
+   `components/secrets/argocd_repository/credentials.yaml` with the SSH
+   **private** key for your repository.
+2. Replace the `replace-me` values in
+   `bootstrap/secrets/argocd-private-repository/kustomization.yaml` with actual
+   values.
+3. Add the below under `resources` in the
+   `bootstrap/secrets/kustomization.yaml`:
+
+   ```sh
+   - argocd-private-repository
+   ```
+4. Replace all references to repositories in this codebase with the URL to your
+   private repo:
+
+   ```sh
+   url="your-repo-url" # <--------- replace this
+   grep -lr repoURL |
+    grep -v README.md |
+    xargs sed -Ei "s;repoURL:.*;repoURL: $url;g"
+   ```
 
 ## Extending the demo
 
