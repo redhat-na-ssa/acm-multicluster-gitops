@@ -1,0 +1,5 @@
+resources:
+  # NOTE: Uncomment the line below if you are creating secrets along with this managed cluster.
+  # - namespace.yaml
+  - managedcluster
+  - gitops

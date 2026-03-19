@@ -1,0 +1,10 @@
+resources:
+  - ../../../../components/namespace
+patches:
+  - target:
+      kind: Namespace
+      name: replace-me
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: cluster-team-2

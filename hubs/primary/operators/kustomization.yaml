@@ -1,0 +1,3 @@
+resources:
+  - ../../../components/operators/web-terminal
+  - ../../../components/operators/cert-manager

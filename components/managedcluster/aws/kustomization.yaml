@@ -1,0 +1,5 @@
+resources:
+  - namespace.yaml
+  - clusterdeployment.yaml
+  - klusterlet_addon.yaml
+  - managedcluster.yaml

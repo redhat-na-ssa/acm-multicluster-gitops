@@ -1,0 +1,19 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: replace-me
+  namespace: replace-me
+spec:
+  upgradeStrategy: Default
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: replace-me
+  namespace: replace-me
+spec:
+  sourceNamespace: openshift-marketplace
+  source: certified-operators
+  channel: stable
+  installPlanApproval: Automatic
+  name: replace-me

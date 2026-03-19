@@ -7,7 +7,7 @@ patches:
     patch: |-
       - op: replace
         path: /metadata/name
-        value: cert-manager-operator
+        value: web-terminal-operator
   - target:
       kind: OperatorGroup
       name: replace-me
@@ -15,10 +15,10 @@ patches:
     patch: |-
       - op: replace
         path: /metadata/name
-        value: cert-manager
+        value: web-terminal
       - op: replace
         path: /metadata/namespace
-        value: cert-manager-operator
+        value: web-terminal-operator
   - target:
       kind: Subscription
       name: replace-me
@@ -26,10 +26,10 @@ patches:
     patch: |-
       - op: replace
         path: /metadata/name
-        value: cert-manager
+        value: web-terminal
       - op: replace
         path: /metadata/namespace
-        value: cert-manager-operator
+        value: web-terminal-operator
       - op: replace
         path: /spec/source
         value: certified-operators
@@ -38,4 +38,4 @@ patches:
         value: stable
       - op: replace
         path: /spec/name
-        value: cert-manager
+        value: web-terminal

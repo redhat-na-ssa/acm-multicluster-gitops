@@ -1,0 +1,88 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../../../components/managedcluster/aws
+patches:
+  - target:
+      kind: Namespace
+      name: replace-me
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: cluster-team-1
+  - target:
+      kind: ManagedCluster
+      name: replace-me
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: cluster-team-1
+      - op: replace
+        path: /metadata/labels/name
+        value: cluster-team-1
+      - op: replace
+        path: /metadata/namespace
+        value: cluster-team-1
+  - target:
+      kind: MachinePool
+      name: replace-me-worker
+      namespace: replace-me
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: cluster-team-1-worker
+      - op: replace
+        path: /metadata/namespace
+        value: cluster-team-1
+      - op: replace
+        path: /spec/clusterDeploymentRef/name
+        value: cluster-team-1
+  - target:
+      kind: KlusterletAddonConfig
+      name: replace-me
+      namespace: replace-me
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: cluster-team-1
+      - op: replace
+        path: /metadata/namespace
+        value: cluster-team-1
+      - op: replace
+        path: /spec/clusterName
+        value: cluster-team-1
+      - op: replace
+        path: /spec/clusterNamespace
+        value: cluster-team-1
+  - target:
+      kind: ClusterDeployment
+      name: replace-me
+      namespace: replace-me
+    patch: |-
+      - op: replace
+        path: /spec/baseDomain
+        value: sandbox1390.opentlc.com
+      - op: replace
+        path: /metadata/name
+        value: cluster-team-1
+      - op: replace
+        path: /metadata/namespace
+        value: cluster-team-1
+      - op: replace
+        path: /spec/clusterName
+        value: cluster-team-1
+      - op: replace
+        path: /metadata/labels/region
+        value: us-east-2
+      - op: replace
+        path: /spec/platform/aws/region
+        value: us-east-2
+      - op: replace
+        path: /spec/provisioning/imageSetRef/name
+        value: img4.18.26-multi-appsub
+      - op: replace
+        path: /spec/provisioning/sshPrivateKeySecretRef/name
+        value: cluster-ssh-key
+      - op: replace
+        path: /spec/pullSecretRef/name
+        value: ocp-pull-secret

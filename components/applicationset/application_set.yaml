@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: replace-me
+  namespace: openshift-gitops
+spec:
+  generators:
+  - clusterDecisionResource:
+      configMapRef: acm-placement
+      labelSelector:
+        matchLabels:
+          cluster.open-cluster-management.io/placement: placement-name
+      requeueAfterSeconds: 30
+  template:
+    metadata:
+      annotations:
+        apps.open-cluster-management.io/ocm-managed-cluster: "{{name}}"
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: openshift-gitops
+      name: application-name
+    spec:
+      destination:
+        namespace: replace-me
+        server: '{{server}}'
+      project: default
+      source: {} # replace-me
+      syncPolicy:
+        automated: {}
+        syncOptions:
+        - CreateNamespace=true

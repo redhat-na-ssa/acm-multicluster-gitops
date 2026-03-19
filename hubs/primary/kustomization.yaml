@@ -1,0 +1,3 @@
+resources:
+  - operators
+  - managed_clusters/team-1

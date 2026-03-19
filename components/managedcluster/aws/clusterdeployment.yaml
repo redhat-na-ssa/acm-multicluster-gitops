@@ -1,0 +1,27 @@
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: replace-me
+  namespace: replace-me
+  labels:
+    cloud: auto-detect
+    region: replace-me
+    vendor: auto-detect
+    cluster.open-cluster-management.io/clusterset: clusters
+spec:
+  baseDomain: replace-me
+  clusterName: replace-me
+  platform:
+    aws:
+      credentialsSecretRef:
+        name: cloud-creds
+      region: replace-me
+  provisioning:
+    imageSetRef:
+      name: replace-me
+    installConfigSecretRef:
+      name: installconfig
+    sshPrivateKeySecretRef:
+      name: replace-me
+  pullSecretRef:
+    name: replace-me

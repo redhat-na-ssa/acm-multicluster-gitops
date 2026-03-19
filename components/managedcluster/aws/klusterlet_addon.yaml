@@ -1,0 +1,18 @@
+apiVersion: agent.open-cluster-management.io/v1
+kind: KlusterletAddonConfig
+metadata:
+  name: replace-me
+  namespace: replace-me
+spec:
+  clusterName: patch-me
+  clusterNamespace: replace-me
+  clusterLabels:
+    cloud: aws
+  applicationManager:
+    enabled: true
+  certPolicyController:
+    enabled: true
+  policyController: 
+    enabled: true
+  searchCollector:
+    enabled: true
