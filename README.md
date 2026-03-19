@@ -281,7 +281,9 @@ spec:
 If everything checks out, bootstrap your ACM hub and watch it go!
 
 ```sh
-oc apply -k bootstrap/base
+oc apply -k bootstrap/namespaces # "Manually" create namespaces for your clusters
+oc apply -k bootstrap/secrets # "Manually" synchronize secrets
+oc apply -k bootstrap/base # Bootstrap your ACM hub and watch it fly!
 ```
 
 Wait about an hour for the three managed clusters to finish provisioning.
@@ -299,12 +301,14 @@ sync against:
 
 ```sh
 # changing the repo URL
+# replace `sed -Ei` with `sed -Ei ''` on macOS
 url="your-repo-url"
 grep -lr repoURL |
     grep -v README.md |
     xargs sed -Ei "s;repoURL:.*;repoURL: $url;g"
 
 # changing the branch
+# replace `sed -Ei` with `sed -Ei ''` on macOS
 branch="your-branch"
 grep -lr targetRevision |
     grep -v README.md |
