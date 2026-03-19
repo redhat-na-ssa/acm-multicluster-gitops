@@ -7,40 +7,71 @@ Useful for demonstrating cluster-level multitenancy.
 
 ```
 ├── bootstrap
-│   ├── clusters
-│   └── operators
-├── clusters
-│   ├── team-1
-│   ├── team-2
-│   └── team-3
-└── components
-    ├── applicationset
-    ├── managedcluster
-    │   └── aws
-    ├── operators
-    │   ├── cert-manager
-    │   └── web-terminal
-    └── secrets
-        ├── cloud_credentials
-            └── aws
-        └── installconfigs
+│   ├── base
+│   ├── namespaces
+│   │   └── clusters
+│   │       ├── team-1
+│   │       ├── team-2
+│   │       └── team-3
+│   └── secrets
+│       └── clusters
+│           ├── team-1
+│           ├── team-2
+│           └── team-3
+├── cluster_typess
+│   ├── type_a
+│   ├── type_b
+│   └── type_c
+├── components
+│   ├── application
+│   ├── applicationset
+│   ├── managedcluster
+│   │   └── aws
+│   ├── namespace
+│   ├── operators
+│   │   ├── _base
+│   │   ├── cert-manager
+│   │   └── web-terminal
+│   └── secrets
+│       ├── _examples
+│       │   ├── cloud_credentials
+│       │   │   └── aws
+│       │   ├── installconfig
+│       │   │   └── aws
+│       │   └── pull_secret
+│       ├── cloud_credentials
+│       │   └── aws
+│       ├── installconfig
+│       │   ├── aws
+│       │   └── templates
+│       └── pull_secret
+└── hubs
+    └── primary
+        ├── managed_clusters
+        │   └── team-1
+        │       ├── gitops
+        │       ├── managedcluster
+        │       └── secrets
+        └── operators
+
 ```
 
-- `bootstrap`: Components that initialize the ACM hub to manage things with
-  GitOps.
-  - `bootstrap/clusters`: Managed clusters to provision and the ArgoCD
-    ApplicationSets that will configure them.
-  - `bootstrap/operators`: Operators to install on the ACM hub.
-- `clusters`: A list of clusters being managed by GitOps.
-- `components`: Re-usable components that can be used by the ACM hub and any
-  managed clusters it manages.
-  - `components/applicationset`: Creates an ArgoCD Application Set.
-  - `managedcluster/$CLOUD`: Provisions a managed cluster in ACM.
-  - `operators`: A list of operators that can be managed with GitOps.
-  - `secrets`: Secrets to install into OpenShift clusters.
+- `bootstrap`: Resources used to kickstart GitOps on ACM hubs.
+    - `bootstrap/namespace`: Namespaces that are applied onto ACM hubs **manually**
+      before applying GitOps resources.
+    - `bootstrap/secrets`: Secrets that are applied onto ACM hubs **manually**
+      before applying GitOps resources.
+    - `bootstrap/base`: The resource that kickstarts GitOps.
+- `cluster_types`: A portfolio of different "flavors" of clusters that your
+  platform teams support. This is useful for ensuring consistent cluster
+  configuration for multiple teams.
+- `components`: Resources deployed into ACM hubs or managed clusters, like
+  namespaces, ArgoCD configurations, operators, and so on.
+- `hubs`: ACM hubs. The bootstrap process creates an ArgoCD application that
+  synchronizes these subdirectories with hub clusters.
+  - `hubs/$HUB_NAME/managed_clusters`: Clusters managed by an ACM hub.
+  - `hubs/$HUB_NAME/operators`: Operators installed into the hub.
 
-> **NOTE**: Secrets in the `secrets` directory are NOT commited to Git. See the
-> `examples` directory for examples.
 
 ## How to use this demo
 
@@ -62,11 +93,11 @@ Useful for demonstrating cluster-level multitenancy.
 Copy the example secrets into the `secrets` top-level directory:
 
 ```sh
-find components/secrets/examples -type f |
+find components/secrets/_examples -type f |
 while read -r secret
 do
-  target="${secrets//example\//}"
-  mkdir -p "$(basename "$target")"
+  target="${secret//_examples\//}"
+  mkdir -p "$(dirname "$target")"
   cp "$secret" "$target"
 done
 ```
@@ -81,7 +112,7 @@ Finally, use the command below to update the Secret that will hold your
 Installer Config with a base64 representation:
 
 ```sh
-yq -r '.data."install-config.yaml" = "'$(base64 -w=0 < /tmp/install-config.yaml)'"' \
+yq -ir '.data."install-config.yaml" = "'$(base64 -w=0 < /tmp/install-config.yaml)'"' \
   components/secrets/installconfig/aws/installconfig.yaml
 ```
 
@@ -108,23 +139,105 @@ keys set to `replace-me` with real values.
     components/secrets/pull_secret/credential.yaml
    ```
 
-### Bootstrapping GitOps
+### Validating Hub configuration
+
+Render the Kustomize template that ArgoCD will apply onto your primary ACM hub:
+
+```sh
+oc kustomize hubs/primary
+```
+
+This should render a YAML similar to this:
+
+```yaml
+apiVersion: operators.coreos.com/v1alpha1
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager-operator
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cluster-team-1
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: web-terminal-operator
+---
+apiVersion: agent.open-cluster-management.io/v1
+kind: KlusterletAddonConfig
+metadata:
+  name: cluster-team-1
+  namespace: cluster-team-1
+spec:
+  applicationManager:
+    enabled: true
+# ...omitted for brevity
+```
+
+Verify that `replace-me` is not in the output:
+
+```sh
+$: kubectl kustomize hubs/primary | grep replace-me
+# should be empty
+```
+
+### Validating the bootstrap configuration
 
 Render the Kustomize templates in the `bootstrap` directory:
 
 ```sh
-oc kustomize bootstrap
+oc kustomize bootstrap/base
 ```
 
 This should produce a YAML like the one shown below:
 
 ```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: primary-hub
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: primary-hub-bootstrap
+    server: https://kubernetes.default.svc
+  ignoreDifferences:
+  - group: cluster.open-cluster-management.io
+    jsonPointers:
+    - /metadata/labels/cloud
+    - /metadata/labels/name
+    - /metadata/labels/vendor
+    kind: ManagedCluster
+  - group: operator.open-cluster-management.io
+    jsonPointers:
+    - /spec/overrides/components
+    kind: MultiClusterHub
+  - group: multicluster.openshift.io
+    jsonPointers:
+    - /spec/overrides/components
+    kind: MultiClusterEngine
+  project: default
+  source:
+    path: ./hubs/primary
+    repoURL: https://github.com/redhat-na-ssa/acm-gitops-demo
+    targetRevision: main
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+    - SkipDryRunOnMissingResource=true
+    - RespectIgnoreDifferences=true
 ```
 
-If it does, apply it and watch it go!
+### Deploy!
+
+If everything checks out, bootstrap your ACM hub and watch it go!
 
 ```sh
-oc apply -k bootstrap
+oc apply -k bootstrap/base
 ```
 
 Wait about an hour for the three managed clusters to finish provisioning.
