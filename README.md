@@ -100,7 +100,7 @@ while read -r secret
 do
   target="${secret//_examples\//}"
   mkdir -p "$(dirname "$target")"
-  cp "$secret" "$target"
+  test -f "$target" || cp "$secret" "$target"
 done
 ```
 
