@@ -22,8 +22,8 @@ Useful for demonstrating cluster-level multitenancy.
     │   └── web-terminal
     └── secrets
         ├── cloud_credentials
-        └── installconfigs
             └── aws
+        └── installconfigs
 ```
 
 - `bootstrap`: Components that initialize the ACM hub to manage things with
@@ -49,7 +49,15 @@ Useful for demonstrating cluster-level multitenancy.
 - An OpenShift cluster with ACM and Multicluster Engine installed.
 - `oc` or `kubectl`
 
-### Deploying
+### Generating Secrets
+
+> **NOTE**: While we are generating the secrets "by hand" here, in a real-world
+> scenario, you would use a secrets manager like HashiCorp Vault to store these
+> secrets securely elsewhere or an encryption tool like
+> [sops](https://github.com/getsops/sops) to store them securely in a Git
+> repository.
+
+#### Creating the directory structure
 
 Copy the example secrets into the `secrets` top-level directory:
 
@@ -62,6 +70,45 @@ do
   cp "$secret" "$target"
 done
 ```
+
+#### Updating the Installer Config secret for your managed clusters
+
+Next, copy the example Installer config in `components/secrets/installconfigs/templates/`
+to your `/tmp` directory, then open it in an editor and replace the keys set to
+`replace-me` with real values.
+
+Finally, use the command below to update the Secret that will hold your
+Installer Config with a base64 representation:
+
+```sh
+yq -r '.data."install-config.yaml" = "'$(base64 -w=0 < /tmp/install-config.yaml)'"' \
+  components/secrets/installconfig/aws/installconfig.yaml
+```
+
+#### Updating cloud credential secrets
+
+Open `components/secrets/cloud_credentials/aws/credential.yaml` and replace the
+keys set to `replace-me` with real values.
+
+#### Updating the OCP pull secret secret
+
+1. Retrieve the pull secret for the Red Hat registry or your company's private
+   registry. It should look something like the below:
+
+    ```json
+    {"auths":{"cloud.openshift.com":{"email":"example@email.address","auth":"long-string"}}}
+    ```
+
+2. Run the command below to update the pull secret credential at
+   `components/secrets/pull_secret/credential.yaml` with a base64-encoded
+   representation:
+
+   ```sh
+   yq -r '.data.".dockerconfigjson" = "'$(echo "$YOUR_PULL_SECRET"| base64 -w=0)'"' ]
+    components/secrets/pull_secret/credential.yaml
+   ```
+
+### Bootstrapping GitOps
 
 Render the Kustomize templates in the `bootstrap` directory:
 
